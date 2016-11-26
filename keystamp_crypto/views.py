@@ -90,11 +90,11 @@ def get_spendables_blockcypher(address, netcode = COIN_NETWORK, txn_limit=200, a
 
     if netcode == "XTN":
         testnet = True
-        BLOCKCYPHER_URL_ADDRESS = "https://api.blockcypher.com/v1/btc/main/addrs/"
+        BLOCKCYPHER_URL_ADDRESS = "https://api.blockcypher.com/v1/btc/test3/addrs/"
 
     if netcode == "BTC":
         coin_symbol='btc-testnet'
-        BLOCKCYPHER_URL_ADDRESS = "https://api.blockcypher.com/v1/btc/test3/addrs/"
+        BLOCKCYPHER_URL_ADDRESS = "https://api.blockcypher.com/v1/btc/main/addrs/"
 
     api_key = os.environ.get('blockcypher_api_key', None)
 
