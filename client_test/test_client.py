@@ -123,15 +123,20 @@ def get_osc_key(URL = URL):
 
 
 
-
+#mist TEsts
 #create_newkey()
+firm_id = "12345"
+print  "%s/%s" % (firm_id[:3], firm_id[3:])
+
+
+
 
 
 
 # TEST SUIT
 # test_upload()
 # test_upload(file_url="https://avatars3.githubusercontent.com/u/147330?v=3&s=52")
-get_osc_key()
+#get_osc_key()
 
 
 

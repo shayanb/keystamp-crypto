@@ -130,16 +130,37 @@ def create_newkey(name = None):
 
 
 def generate_osc_key(request):
-    osc_key = create_newkey()
-    ret_json = osc_key
-    ret_json["status"] = "success"
-    return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
+    try:
+        osc_key = create_newkey()
+        ret_json = osc_key
+        ret_json["status"] = "success"
+        return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
+    except Exception, e:
+        ret_json = {"status": "failed"}
+        ret_json["message"] = e.message
+        return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
 
-#ret_key = get_address_by_path(key, path)
 
 
+def get_firm_key(request):
+    if request.method == 'POST':
+        print "get_children_key: %s" % request.POST
+        try:
+            master_key = request.POST.get('osc_key', None)
+            firm_id = str(request.POST.get('firm_id', None))
+            path = "%s/%s" % (firm_id[:3], firm_id[3:])
+        except Exception, e:
+            print "failed get_firm_key: %s " %e
+            ret_json = {"status": "failed"}
+            ret_json["message"] = e.message
+            return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
 
-#
+        firm_key = get_xprv_by_path(master_key, path)
+        ret_json = firm_key
+        ret_json["status"] = "success"
+        return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
+
+
 # def list(request):
 #
 #     documents = Document.objects.all()

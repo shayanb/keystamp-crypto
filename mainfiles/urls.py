@@ -15,6 +15,7 @@ urlpatterns = [
 
     url(r'^generate_master_seed', keystamp_crypto.views.generate_osc_key, name='generate_osc_key'),
 
+    url(r'^generate_firm_key', keystamp_crypto.views.get_firm_key, name='get_firm_key'),
 
     #    url(r'^listdocs', keystamp_crypto.views.list, name='list'),
 
