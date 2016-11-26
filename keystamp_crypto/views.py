@@ -32,11 +32,11 @@ def hashme(request):
         print "hashme: %s" %request.POST
         try:
             file_url = request.POST.get('file_url', "http://blog.theshayan.com/wp-content/uploads/2015/11/3-940x429.png")
+            r = urllib2.urlopen(file_url)
         except Exception, e:
             print "failed to get url %s " %e
             return HttpResponse(json.dumps({"status":"failed", "reason": e.message}), content_type="application/json", status = 400)
 
-        r = urllib2.urlopen(file_url)
         ret_json = {}
         if request.POST.get('file_url', None) is None:
             ret_json['file_url_missing'] = 'using_testimage'
