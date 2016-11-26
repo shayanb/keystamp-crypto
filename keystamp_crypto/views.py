@@ -262,12 +262,14 @@ def op_return_this(privatekey, text):
     tx.set_unspents(spendables)
     signed_tx = sign_tx(tx, wifs=[privatekey])
 
-    print "singed_tx: %s" %signed_tx
+    print "singed_tx: %s" %signed_tx.as_hex()
+
+    #TODO: uncomment this when its ready to push data to blockchian
+    #broadcast_tx_blockr(signed_tx.as_hex())
 
 
 def broadcast_tx_blockr(signed_tx):
     BLOCKR_URL_BROADCAST = "http://btc.blockr.io/api/v1/tx/push"
-
     url = BLOCKR_URL_BROADCAST
     data = json.dumps({"hex":signed_tx})
     try:
@@ -277,7 +279,7 @@ def broadcast_tx_blockr(signed_tx):
     except Exception, E:
         print ('Failed to fetch a url %s - %s' % (E, url))
         return {"status":"fail", "error":"invalid broadcast respond: %s " % E.message}
-    
+
     try:
         response_json = json.loads(result)
         print("blocker tx_hash %s" % response_json["data"])
@@ -288,3 +290,5 @@ def broadcast_tx_blockr(signed_tx):
     except Exception:
         print("invalid broadcast respond from blockr.io: %s" % result)
         return {"status":"fail", "error":"invalid broadcast respond: %s " % result}
+
+########################## / OP RETURN ##############################
