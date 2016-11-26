@@ -4,6 +4,10 @@ from pycoin.key.BIP32Node import BIP32Node
 import subprocess
 
 
+# zx9pu8Q3BZxRZhRLj
+# 138.197.141.252
+
+
 COIN_NETWORK = "BTC"
 
 '''
@@ -134,12 +138,22 @@ def get_advisor_key(firm_key, advisor_id, URL= URL):
     print r
     return r
 
+import hashlib
+
+def sha256_checksum(text, block_size=65536):
+    sha256 = hashlib.sha256()
+    # with open(file,mode='r', buffering=-1) as f:
+
+    sha256.update(text)
+    return sha256.hexdigest()
+
 
 #mist TEsts
 #create_newkey()
 # firm_id = "12345"
 # print  "%s/%s" % (firm_id[:3], firm_id[3:])
 
+print sha256_checksum("H/DIn8uA1scAuKLlCx+/9LnAcJtwQQ0PmcPrJUq90aboLv3fH5fFvY+vmbfOSFEtGarznYli6ShPr9RXwY9UrIY=")
 
 
 
@@ -148,8 +162,8 @@ def get_advisor_key(firm_key, advisor_id, URL= URL):
 # TEST SUIT
 # test_upload()
 # test_upload(file_url="https://avatars3.githubusercontent.com/u/147330?v=3&s=52")
-osc_key = get_osc_key()
-firm_key = get_firm_key(master_seed = osc_key.get("xprv"), firm_id = "32143")
-advisor_key = get_advisor_key(firm_key = firm_key.get("xprv"), advisor_id="12366")
-
+# osc_key = get_osc_key()
+# firm_key = get_firm_key(master_seed = osc_key.get("xprv"), firm_id = "32143")
+# advisor_key = get_advisor_key(firm_key = firm_key.get("xprv"), advisor_id="12366")
+#
 

@@ -19,6 +19,8 @@ urlpatterns = [
 
     url(r'^generate_advisor_key', keystamp_crypto.views.get_advisor_key, name='get_advisor_key'),
 
+    url(r'^hash_string', keystamp_crypto.views.sha256_text, name='sha256_text'),
+
     #    url(r'^listdocs', keystamp_crypto.views.list, name='list'),
 
     # url(r'^db', hello.views.db, name='db'),

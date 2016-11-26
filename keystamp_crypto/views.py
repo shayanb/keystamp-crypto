@@ -22,6 +22,26 @@ def sha256_checksum(file, block_size=65536):
         sha256.update(block)
     return sha256.hexdigest()
 
+
+
+def sha256_text(request):
+    if request.method == 'POST':
+        print "sha256_text: %s" % request.POST
+        try:
+            text = request.POST.get('text')
+            sha256 = hashlib.sha256()
+            sha256.update(text)
+        except Exception, e:
+            print "failed to get url %s " % e
+            return HttpResponse(json.dumps({"status": "failed", "reason": e.message}), content_type="application/json",
+                                status=400)
+
+        return HttpResponse(json.dumps({"status": "success", "hash": sha256.hexdigest()}), content_type="application/json",
+                                status=200)
+
+    return HttpResponse(json.dumps({"error": "no Get request"}), content_type="application/json", status=400)
+
+
 # Create your views here.
 def index(request):
     return HttpResponse('#RegHackTo!')
