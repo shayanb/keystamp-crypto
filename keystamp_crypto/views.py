@@ -17,6 +17,7 @@ from pycoin.tx.tx_utils import sign_tx
 from pycoin.tx.TxOut import TxOut, standard_tx_out_script
 from binascii import hexlify
 from pycoin.key import Key
+from pycoin.tx import Spendable
 
 import requests
 import json
@@ -314,7 +315,12 @@ def op_return_this(privatekey, text, bitcoin_fee = 30000):
     message = hexlify(text.encode()).decode('utf8')
 
     ## Get the spendable outputs we are going to use to pay the fee
-    spendables = get_spendables_blockcypher(bitcoin_address)
+    spendables_str = get_spendables_blockcypher(bitcoin_address)
+    spendables = []
+    for spendable in spendables_str:
+        spendables.append(Spendable.from_text(spendable))
+
+
     bitcoin_sum = sum(spendable.coin_value for spendable in spendables)
     if(bitcoin_sum < bitcoin_fee):
         print "ERROR: not enough balance: available: %s - fee: %s" %(bitcoin_sum, bitcoin_fee)
