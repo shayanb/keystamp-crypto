@@ -11,6 +11,16 @@ import json
 import hashlib
 from pycoin.key.BIP32Node import BIP32Node
 
+from pycoin.services.blockchain_info import spendables_for_address
+from pycoin.tx import script, Tx
+from pycoin.tx.tx_utils import sign_tx
+from pycoin.tx.TxOut import TxOut, standard_tx_out_script
+from binascii import hexlify
+from pycoin.Key import Key
+
+import requests
+import json
+
 
 
 COIN_NETWORK = "BTC" # XTN for testnet!
@@ -199,28 +209,82 @@ def get_advisor_key(request):
         ret_json["status"] = "success"
         return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
 
-
-
-# def list(request):
-#
-#     documents = Document.objects.all()
-#     ret_json = []
-#     for document in documents:
-#         ret_json.append({'name': document.docfile.name,
-#                          'url': document.docfile.url,
-#                          'hash': document.hash,
-#                          'upload_time': document.upload_time})
-#     return HttpResponse(json.dumps(ret_json), content_type="application/json")
-#
+########################## / BIP32 stuff ##############################
 
 
 
-# def db(request):
-#
-#     greeting = Greeting()
-#     greeting.save()
-#
-#     greetings = Greeting.objects.all()
-#
-#     return render(request, 'db.html', {'greetings': greetings})
-#
+########################## OP RETURN ##############################
+
+def get_key(privatekey):
+    new_key = Key.from_text(privatekey)
+    print ("Bitcoin Address %s " % new_key.bitcoin_address())
+    return new_key
+
+def op_return_this(privatekey, text):
+
+    bitcoin_keyobj = get_key(privatekey)
+    bitcoin_address = bitcoin_keyobj.bitcoin_address()
+    bitcoin_fee = 30000 # In satoshis
+
+    message = hexlify(text.encode()).decode('utf8')
+
+    ## Get the spendable outputs we are going to use to pay the fee
+    spendables = spendables_for_address(bitcoin_address)
+    bitcoin_sum = sum(spendable.coin_value for spendable in spendables)
+    if(bitcoin_sum < bitcoin_fee):
+        print "ERROR: not enough balance: available: %s - fee: %s" %(bitcoin_sum, bitcoin_fee)
+        return False
+
+    ## Create the inputs we are going to use
+    inputs = [spendable.tx_in() for spendable in spendables]
+
+    ## If we will have change left over create an output to send it back
+    outputs = []
+    if (bitcoin_sum > bitcoin_fee):
+        change_output_script = standard_tx_out_script(bitcoin_address)
+        total_amout = bitcoin_sum - bitcoin_fee
+        outputs.append(TxOut(total_amout - bitcoin_fee, change_output_script))
+
+        home_address = standard_tx_out_script(bitcoin_address)
+        if (bitcoin_sum - bitcoin_fee) > 100000:
+            outputs.append(TxOut(100000, home_address))
+        else:
+            outputs.append(TxOut((bitcoin_sum - bitcoin_fee) / 2, home_address))
+
+    ## Build the OP_RETURN output with our message
+    op_return_output_script = script.tools.compile("OP_RETURN %s" % message)
+    outputs.append(TxOut(0, op_return_output_script))
+
+    ## Create the transaction and sign it with the private key
+    tx = Tx(version=1, txs_in=inputs, txs_out=outputs)
+    # print tx.as_hex()
+    # print spendables
+    tx.set_unspents(spendables)
+    signed_tx = sign_tx(tx, wifs=[privatekey])
+
+    print "singed_tx: %s" %signed_tx
+
+
+def broadcast_tx_blockr(signed_tx):
+    BLOCKR_URL_BROADCAST = "http://btc.blockr.io/api/v1/tx/push"
+
+    url = BLOCKR_URL_BROADCAST
+    data = json.dumps({"hex":signed_tx})
+    try:
+        request = requests.post(url, data=data)
+        result = request.text
+        print ("blockr raw response %s" %result)
+    except Exception, E:
+        print ('Failed to fetch a url %s - %s' % (E, url))
+        return {"status":"fail", "error":"invalid broadcast respond: %s " % E.message}
+    
+    try:
+        response_json = json.loads(result)
+        print("blocker tx_hash %s" % response_json["data"])
+        if response_json.get("status", None) == "success":
+            return {"status":"success","transaction_hash":response_json["data"]}
+        if response_json.get("status", None) == "fail":
+            return {"status":"fail","error":json.dumps(response_json).replace("\\","")}
+    except Exception:
+        print("invalid broadcast respond from blockr.io: %s" % result)
+        return {"status":"fail", "error":"invalid broadcast respond: %s " % result}
