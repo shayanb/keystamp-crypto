@@ -121,12 +121,24 @@ def get_osc_key(URL = URL):
     return r
 
 
+def get_firm_key(master_seed, firm_id, URL=URL):
+    URL += '/generate_firm_key'
+    r = requests.post(URL, data={'osc_key': master_seed, 'firm_id': firm_id}).json()
+    print r
+    return r
+
+
+def get_advisor_key(firm_key, advisor_id, URL= URL):
+    URL += '/get_advisor_key'
+    r = requests.post(URL, data={'firm_key': firm_key, 'advisor_id': advisor_id}).json()
+    print r
+    return r
 
 
 #mist TEsts
 #create_newkey()
-firm_id = "12345"
-print  "%s/%s" % (firm_id[:3], firm_id[3:])
+# firm_id = "12345"
+# print  "%s/%s" % (firm_id[:3], firm_id[3:])
 
 
 
@@ -136,7 +148,8 @@ print  "%s/%s" % (firm_id[:3], firm_id[3:])
 # TEST SUIT
 # test_upload()
 # test_upload(file_url="https://avatars3.githubusercontent.com/u/147330?v=3&s=52")
-#get_osc_key()
-
+osc_key = get_osc_key()
+firm_key = get_firm_key(master_seed = osc_key.get("xprv"), firm_id = "32143")
+advisor_key = get_advisor_key(firm_key = firm_key.get("xprv"), advisor_id="12366")
 
 

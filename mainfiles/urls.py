@@ -17,6 +17,8 @@ urlpatterns = [
 
     url(r'^generate_firm_key', keystamp_crypto.views.get_firm_key, name='get_firm_key'),
 
+    url(r'^generate_advisor_key', keystamp_crypto.views.get_advisor_key, name='get_advisor_key'),
+
     #    url(r'^listdocs', keystamp_crypto.views.list, name='list'),
 
     # url(r'^db', hello.views.db, name='db'),

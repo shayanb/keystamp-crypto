@@ -59,7 +59,7 @@ def hashme(request):
 
 ########################## BIP32 stuff ##############################
 
-def get_address_by_path(key, path):
+def get_address_by_path(key, path,  is_hardned = False):
     '''
     gets key = xpub or xpriv and path
     returns JSON
@@ -67,15 +67,15 @@ def get_address_by_path(key, path):
     xpub: {"address":"1qwerty...", "priv_key":None, "path":"1/2"}
     '''
     da_key = BIP32Node.from_wallet_key(key)
-    btc_address = da_key.subkey_for_path(path).bitcoin_address()
-    btc_private = da_key.subkey_for_path(path).wif()
+    btc_address = da_key.subkey_for_path(path, is_hardned = is_hardned).bitcoin_address()
+    btc_private = da_key.subkey_for_path(path, is_hardned = is_hardned).wif()
     return {"address":btc_address, "priv_key":btc_private, "path":path}
 
 
-def get_xprv_by_path(key, path):
+def get_xprv_by_path(key, path, is_hardned = False):
     da_key = BIP32Node.from_wallet_key(key)
-    xprv = da_key.subkey_for_path(path).wallet_key(as_private=True)
-    xpub = da_key.subkey_for_path(path).wallet_key()
+    xprv = da_key.subkey_for_path(path, is_hardned = is_hardned).wallet_key(as_private=True)
+    xpub = da_key.subkey_for_path(path, is_hardned = is_hardned).wallet_key()
     return {"xpub": xpub, "xprv": xprv, "path": path}
 
 
@@ -155,10 +155,30 @@ def get_firm_key(request):
             ret_json["message"] = e.message
             return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
 
-        firm_key = get_xprv_by_path(master_key, path)
+        firm_key = get_xprv_by_path(master_key, path, is_hardned= True)
         ret_json = firm_key
         ret_json["status"] = "success"
         return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
+
+
+def get_advisor_key(request):
+    if request.method == 'POST':
+        print "get_advisor_key: %s" % request.POST
+        try:
+            master_key = request.POST.get('firm_key', None)
+            firm_id = str(request.POST.get('advisor_id', None))
+            path = "%s/%s" % (firm_id[:3], firm_id[3:])
+        except Exception, e:
+            print "failed get_advisor_key: %s " % e
+            ret_json = {"status": "failed"}
+            ret_json["message"] = e.message
+            return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
+
+        advisor_key = get_xprv_by_path(master_key, path)
+        ret_json = advisor_key
+        ret_json["status"] = "success"
+        return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
+
 
 
 # def list(request):

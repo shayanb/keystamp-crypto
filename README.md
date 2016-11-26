@@ -42,3 +42,9 @@ response {'status': 'success', 'xpub': 'xpub661MyMwAqRbcEkr1KVuZG4s7BXbGkoSjMGEG
 /generate_firm_key HTTP POST {"osc_key": "OSC_XPRV" ,"firm_id": 12345}
 response  {'status': 'success', "xpub": xpub, "xprv": xprv,'path' : 'path'}
 ```
+
+```
+# generate advisor key using firm key and advisor_id (5 digit int)
+/generate_advisor_key HTTP POST {"firm_key": "FIRM_XPRV" ,"advisor_id": 12345}
+response  {'status': 'success', "xpub": xpub, "xprv": xprv,'path' : 'path'}
+```
