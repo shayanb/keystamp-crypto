@@ -4,6 +4,8 @@ from django.http import HttpResponse
 import urllib2
 from .models import Greeting
 from .models import Document
+import sys
+import subprocess
 
 import json
 import hashlib
@@ -57,18 +59,24 @@ def hashme(request):
 
 ########################## BIP32 stuff ##############################
 
-def get_address_by_path(wallet_key, path):
+def get_address_by_path(key, path):
     '''
-    gets wallet_key = xpub or xpriv and path
+    gets key = xpub or xpriv and path
     returns JSON
     xprv: {"address":"1qwerty...", "priv_key":"Kqwert...", "path":"1/2"}
     xpub: {"address":"1qwerty...", "priv_key":None, "path":"1/2"}
     '''
-    da_key = BIP32Node.from_wallet_key(wallet_key)
+    da_key = BIP32Node.from_wallet_key(key)
     btc_address = da_key.subkey_for_path(path).bitcoin_address()
     btc_private = da_key.subkey_for_path(path).wif()
     return {"address":btc_address, "priv_key":btc_private, "path":path}
 
+
+def get_xprv_by_path(key, path):
+    da_key = BIP32Node.from_wallet_key(key)
+    xprv = da_key.subkey_for_path(path).wallet_key(as_private=True)
+    xpub = da_key.subkey_for_path(path).wallet_key()
+    return {"xpub": xpub, "xprv": xprv, "path": path}
 
 
 
@@ -109,14 +117,23 @@ def create():
     raise e
 
 
+
 def create_newkey(name = None):
     bip32_key = create()
     xpub = bip32_key.wallet_key(as_private=False)
     xprv = bip32_key.wallet_key(as_private=bip32_key.is_private())
-    print xpub
-    print xprv
+    return {"xpub": xpub, "xprv": xprv}
+    # print xpub
+    # print xprv
 
 
+
+
+def generate_osc_key(request):
+    osc_key = create_newkey()
+    ret_json = osc_key
+    ret_json["status"] = "success"
+    return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
 
 #ret_key = get_address_by_path(key, path)
 

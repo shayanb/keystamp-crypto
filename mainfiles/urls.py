@@ -13,7 +13,10 @@ urlpatterns = [
     url(r'^$', keystamp_crypto.views.index, name='index'),
     url(r'^hashme$', keystamp_crypto.views.hashme, name='hashme'),
 
-#    url(r'^listdocs', keystamp_crypto.views.list, name='list'),
+    url(r'^generate_master_seed', keystamp_crypto.views.generate_osc_key, name='generate_osc_key'),
+
+
+    #    url(r'^listdocs', keystamp_crypto.views.list, name='list'),
 
     # url(r'^db', hello.views.db, name='db'),
    # url(r'^admin/', include(admin.site.urls)),
