@@ -11,6 +11,7 @@ import keystamp_crypto.views
 
 urlpatterns = [
     url(r'^$', keystamp_crypto.views.index, name='index'),
+
     url(r'^hashme$', keystamp_crypto.views.hashme, name='hashme'),
 
     url(r'^hash_string', keystamp_crypto.views.sha256_text, name='sha256_text'),

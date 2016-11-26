@@ -11,7 +11,7 @@ import json
 import hashlib
 from pycoin.key.BIP32Node import BIP32Node
 
-from pycoin.services.blockchain_info import spendables_for_address
+#from pycoin.services.blockchain_info import spendables_for_address
 from pycoin.tx import script, Tx
 from pycoin.tx.tx_utils import sign_tx
 from pycoin.tx.TxOut import TxOut, standard_tx_out_script
