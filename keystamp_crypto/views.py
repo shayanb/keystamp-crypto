@@ -16,7 +16,7 @@ from pycoin.tx import script, Tx
 from pycoin.tx.tx_utils import sign_tx
 from pycoin.tx.TxOut import TxOut, standard_tx_out_script
 from binascii import hexlify
-from pycoin.Key import Key
+from pycoin.key import Key
 
 import requests
 import json
@@ -84,6 +84,90 @@ def hashme(request):
     return HttpResponse(json.dumps({"error":"no Get request"}), content_type="application/json", status = 400)
 
 
+########################## Bitcoin Network stuff ##############################
+def get_spendables_blockcypher(address, netcode = COIN_NETWORK, txn_limit=200, api_key=None, before_bh=None, confirmations=None):
+
+    if netcode == "XTN":
+        testnet = True
+        BLOCKCYPHER_URL_ADDRESS = "https://api.blockcypher.com/v1/btc/main/addrs/"
+
+    if netcode == "BTC":
+        coin_symbol='btc-testnet'
+        BLOCKCYPHER_URL_ADDRESS = "https://api.blockcypher.com/v1/btc/test3/addrs/"
+
+    api_key = os.environ.get('blockcypher_api_key', None)
+
+    print ("blockcypher spendable for %s" %address)
+
+    url = BLOCKCYPHER_URL_ADDRESS + address + "?unspentOnly=true&token=%s&includeScript=true" %(api_key)
+
+
+    try:
+        request = requests.get(url,
+                            validate_certificate=True)
+
+        result = request.content
+        result_json = json.loads(result)
+    except Exception, E:
+        print ('Failed to fetch a url %s : %s' % (url, E))
+        return None
+        #raise ValueError('Failed to fetch a url %s - %s' % (url,data))
+
+    all_spendables = []
+    for txn in result_json.get("txrefs", []):
+        unspent = {}
+        unspent["tx_hash"] = txn.get("tx_hash")
+        unspent["value"] = txn.get("value")
+        unspent["index"] = txn.get("tx_output_n")
+        unspent["script_hex"] = txn.get("script")
+        all_spendables.append(unspent)
+    return all_spendables
+
+
+
+def broadcast_tx_blockcypher(signed_tx, netcode = COIN_NETWORK):
+    '''
+    alternative to chain.com method to broadcast transactions
+
+    blockcypher.com
+
+    '''
+    if netcode == "XTN":
+        testnet = True
+        BLOCKCYPHER_URL_BROADCAST = "https://api.blockcypher.com/v1/btc/test3/txs/push"
+
+    if netcode == "BTC":
+        coin_symbol = 'btc-testnet'
+        BLOCKCYPHER_URL_BROADCAST = "https://api.blockcypher.com/v1/btc/main/txs/push"
+
+    api_key = os.environ.get('blockcypher_api_key', None)
+
+    payload = {'token':api_key}
+    payload['tx'] = signed_tx
+    try:
+        request = requests.post(BLOCKCYPHER_URL_BROADCAST,
+                            data=payload)
+
+        result = request.content
+    except Exception:
+        print ('Failed to fetch a url %s - %s' % (BLOCKCYPHER_URL_BROADCAST,payload))
+        #raise ValueError('Failed to fetch a url %s - %s' % (url,data))
+
+    try:
+        response_json = json.loads(result)
+        print "blockcypher tx_hash %s" % response_json["tx"]["hash"]
+        if "errors" in response_json:
+            return False
+
+        if "tx" in response_json:
+            return response_json["tx"]["hash"]
+
+    except Exception:
+        print ("invalid broadcast respond from blockcypher: %s" % result)
+        return False
+
+
+########################## / Bitcoin Network stuff ##############################
 
 
 
@@ -216,6 +300,8 @@ def get_advisor_key(request):
 
 ########################## OP RETURN ##############################
 
+
+
 def get_key(privatekey):
     new_key = Key.from_text(privatekey)
     print ("Bitcoin Address %s " % new_key.bitcoin_address())
@@ -229,7 +315,7 @@ def op_return_this(privatekey, text, bitcoin_fee = 30000):
     message = hexlify(text.encode()).decode('utf8')
 
     ## Get the spendable outputs we are going to use to pay the fee
-    spendables = spendables_for_address(bitcoin_address)
+    spendables = get_spendables_blockcypher(bitcoin_address)
     bitcoin_sum = sum(spendable.coin_value for spendable in spendables)
     if(bitcoin_sum < bitcoin_fee):
         print "ERROR: not enough balance: available: %s - fee: %s" %(bitcoin_sum, bitcoin_fee)
@@ -265,7 +351,7 @@ def op_return_this(privatekey, text, bitcoin_fee = 30000):
     print "singed_tx: %s" %signed_tx.as_hex()
 
     #TODO: uncomment this when its ready to push data to blockchian
-    #tx_hash = broadcast_tx_blockr(signed_tx.as_hex())
+    #tx_hash = broadcast_tx_blockcypher(signed_tx.as_hex())
     return tx_hash
 
 
