@@ -108,6 +108,7 @@ def get_spendables_blockcypher(address, netcode = COIN_NETWORK, txn_limit=200, a
 
         result = request.content
         result_json = json.loads(result)
+        print "spendables: %s "% result_json
     except Exception, E:
         print ('Failed to fetch a url %s : %s' % (url, E))
         return None
