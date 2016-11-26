@@ -21,6 +21,7 @@ from pycoin.Key import Key
 import requests
 import json
 
+import os
 
 
 COIN_NETWORK = "BTC" # XTN for testnet!
@@ -265,7 +266,8 @@ def op_return_this(privatekey, text):
     print "singed_tx: %s" %signed_tx.as_hex()
 
     #TODO: uncomment this when its ready to push data to blockchian
-    #broadcast_tx_blockr(signed_tx.as_hex())
+    #tx_hash = broadcast_tx_blockr(signed_tx.as_hex())
+    return tx_hash
 
 
 def broadcast_tx_blockr(signed_tx):
@@ -278,17 +280,46 @@ def broadcast_tx_blockr(signed_tx):
         print ("blockr raw response %s" %result)
     except Exception, E:
         print ('Failed to fetch a url %s - %s' % (E, url))
-        return {"status":"fail", "error":"invalid broadcast respond: %s " % E.message}
+        return False
 
     try:
         response_json = json.loads(result)
         print("blocker tx_hash %s" % response_json["data"])
         if response_json.get("status", None) == "success":
-            return {"status":"success","transaction_hash":response_json["data"]}
+            return response_json["data"]
         if response_json.get("status", None) == "fail":
-            return {"status":"fail","error":json.dumps(response_json).replace("\\","")}
+            print json.dumps({"status":"fail","error":json.dumps(response_json).replace("\\","")})
+            return False
     except Exception:
         print("invalid broadcast respond from blockr.io: %s" % result)
-        return {"status":"fail", "error":"invalid broadcast respond: %s " % result}
+        return False
+
+
+
+
+def noterizeme(request):
+    if request.method == 'POST':
+        print "noterizeme: %s" % request.POST
+        try:
+            text = request.POST.get('text', None)
+            privatekey = os.environ.get('NOTERIZE_PRV', None)
+        except Exception, e:
+            print "failed noterizeme: %s " % e
+            ret_json = {"status": "failed"}
+            ret_json["message"] = e.message
+            return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
+
+        if text is None or privatekey is None:
+            print "failed noterizeme: text or privatekey is None "
+            return HttpResponse(json.dumps({"status":"failed","message":"missing text or prvkey"}), content_type="application/json", status=400)
+
+        tx_hash = op_return_this(privatekey, text)
+
+        if not tx_hash:
+            return HttpResponse(json.dumps({"status":"failed","message":"failed to broadcast"}), content_type="application/json", status=400)
+
+        return HttpResponse(json.dumps({"status":"success","tx_hash":tx_hash}), content_type="application/json", status=200)
+
+
 
 ########################## / OP RETURN ##############################
