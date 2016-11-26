@@ -11,6 +11,9 @@ import json
 import hashlib
 from pycoin.key.BIP32Node import BIP32Node
 
+from pycoin.serialize import h2b, h2b_rev
+
+
 #from pycoin.services.blockchain_info import spendables_for_address
 from pycoin.tx import script, Tx
 from pycoin.tx.tx_utils import sign_tx
@@ -112,7 +115,7 @@ def get_spendables_blockcypher(address, netcode = COIN_NETWORK, txn_limit=200, a
         print "spendables: %s "% result_json
     except Exception, E:
         print ('Failed to fetch a url %s : %s' % (url, E))
-        return None
+        return []
         #raise ValueError('Failed to fetch a url %s - %s' % (url,data))
 
     all_spendables = []
@@ -315,10 +318,14 @@ def op_return_this(privatekey, text, bitcoin_fee = 30000):
     message = hexlify(text.encode()).decode('utf8')
 
     ## Get the spendable outputs we are going to use to pay the fee
-    spendables_str = get_spendables_blockcypher(bitcoin_address)
+    all_spendables = get_spendables_blockcypher(bitcoin_address)
     spendables = []
-    for spendable in spendables_str:
-        spendables.append(Spendable.from_text(spendable))
+    for unspent in all_spendables:
+        coin_value = unspent.get("value")
+        script = h2b(unspent.get("script_hex"))
+        previous_hash = h2b_rev(unspent.get("tx_hash"))
+        previous_index = unspent.get("index")
+        spendables.append(Spendable(coin_value, script, previous_hash, previous_index))
 
 
     bitcoin_sum = sum(spendable.coin_value for spendable in spendables)
