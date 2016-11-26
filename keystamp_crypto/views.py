@@ -104,8 +104,7 @@ def get_spendables_blockcypher(address, netcode = COIN_NETWORK, txn_limit=200, a
 
 
     try:
-        request = requests.get(url,
-                            validate_certificate=True)
+        request = requests.get(url)
 
         result = request.content
         result_json = json.loads(result)

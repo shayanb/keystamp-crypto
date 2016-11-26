@@ -58,6 +58,7 @@ def test_string_hash(text = None, URL = URL):
         print "PASSED"
     else:
         print "FAILED"
+    return r_json.get("hash")
 
 
 def get_address_by_path(key, path):
@@ -161,7 +162,8 @@ def sha256_checksum(text, block_size=65536):
 
 def test_notarize(text, URL = URL):
     URL += '/notarize'
-    r = requests.post(URL, data={'text':text}).json()
+    print text
+    r = requests.post(URL, data={"text" : text}).json()
     print r
     return r
 
