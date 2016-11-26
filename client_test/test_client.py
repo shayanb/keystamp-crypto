@@ -22,12 +22,12 @@ response: {'status': 'success', 'hash': 'dbfdad915a13827c1684b39ff9875b24efaebd2
 '''
 
 try:
-    if sys.argv[1] == "online":
-        URL = "https://reghackto.herokuapp.com/"
+    if not sys.argv[1] == "local":
+        URL = "https://reghackto.herokuapp.com"
     else:
         URL = "http://127.0.0.1:5000"
 except:
-    URL = "http://127.0.0.1:5000"
+    URL = "https://reghackto.herokuapp.com"
     pass
 
 
@@ -153,17 +153,15 @@ def sha256_checksum(text, block_size=65536):
 # firm_id = "12345"
 # print  "%s/%s" % (firm_id[:3], firm_id[3:])
 
-print sha256_checksum("H/DIn8uA1scAuKLlCx+/9LnAcJtwQQ0PmcPrJUq90aboLv3fH5fFvY+vmbfOSFEtGarznYli6ShPr9RXwY9UrIY=")
-
 
 
 
 
 # TEST SUIT
-# test_upload()
-# test_upload(file_url="https://avatars3.githubusercontent.com/u/147330?v=3&s=52")
-# osc_key = get_osc_key()
-# firm_key = get_firm_key(master_seed = osc_key.get("xprv"), firm_id = "32143")
-# advisor_key = get_advisor_key(firm_key = firm_key.get("xprv"), advisor_id="12366")
-#
+#test_upload()
+test_upload(file_url="https://avatars3.githubusercontent.com/u/147330?v=3&s=52")
+osc_key = get_osc_key()
+firm_key = get_firm_key(master_seed = osc_key.get("xprv"), firm_id = "32143")
+advisor_key = get_advisor_key(firm_key = firm_key.get("xprv"), advisor_id="12366")
+
 
