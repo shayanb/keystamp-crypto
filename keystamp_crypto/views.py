@@ -350,7 +350,7 @@ def op_return_this(privatekey, text, bitcoin_fee = 30000):
     print "singed_tx: %s" %signed_tx.as_hex()
 
     #TODO: uncomment this when its ready to push data to blockchian
-    #tx_hash = broadcast_tx_blockcypher(signed_tx.as_hex())
+    tx_hash = broadcast_tx_blockcypher(signed_tx.as_hex())
     return tx_hash
 
 

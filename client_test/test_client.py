@@ -159,6 +159,12 @@ def sha256_checksum(text, block_size=65536):
     return sha256.hexdigest()
 
 
+def test_notarize(text, URL = URL):
+    URL += '/notarize'
+    r = requests.post(URL, data={'text':text}).json()
+    print r
+    return r
+
 #mist TEsts
 #create_newkey()
 # firm_id = "12345"
@@ -171,9 +177,10 @@ def sha256_checksum(text, block_size=65536):
 # TEST SUIT
 #test_upload()
 test_file_hash(file_url="https://avatars3.githubusercontent.com/u/147330?v=3&s=52")
-test_string_hash(text="THIS IS A TEST TEXT TO BE HASHED")
-osc_key = get_osc_key()
-firm_key = get_firm_key(master_seed = osc_key.get("xprv"), firm_id = "32143")
-advisor_key = get_advisor_key(firm_key = firm_key.get("xprv"), advisor_id="12366")
+test_hash = test_string_hash(text="THIS IS A TEST TEXT TO BE HASHED")
+# osc_key = get_osc_key()
+# firm_key = get_firm_key(master_seed = osc_key.get("xprv"), firm_id = "32143")
+# advisor_key = get_advisor_key(firm_key = firm_key.get("xprv"), advisor_id="12366")
 
 
+test_notarize(text = test_hash)
