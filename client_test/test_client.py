@@ -129,7 +129,7 @@ def get_firm_key(master_seed, firm_id, URL=URL):
 
 
 def get_advisor_key(firm_key, advisor_id, URL= URL):
-    URL += '/get_advisor_key'
+    URL += '/generate_advisor_key'
     r = requests.post(URL, data={'firm_key': firm_key, 'advisor_id': advisor_id}).json()
     print r
     return r
