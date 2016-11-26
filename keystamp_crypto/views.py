@@ -15,12 +15,14 @@ from pycoin.serialize import h2b, h2b_rev
 
 
 #from pycoin.services.blockchain_info import spendables_for_address
-from pycoin.tx import script, Tx
+from pycoin.tx import Tx
+from pycoin.tx.script import tools
 from pycoin.tx.tx_utils import sign_tx
 from pycoin.tx.TxOut import TxOut, standard_tx_out_script
 from binascii import hexlify
 from pycoin.key import Key
 from pycoin.tx import Spendable
+
 
 import requests
 import json
@@ -350,7 +352,7 @@ def op_return_this(privatekey, text, bitcoin_fee = 30000):
             outputs.append(TxOut((bitcoin_sum - bitcoin_fee) / 2, home_address))
 
     ## Build the OP_RETURN output with our message
-    op_return_output_script = script.tools.compile("OP_RETURN %s" % message)
+    op_return_output_script = tools.compile("OP_RETURN %s" % message)
     outputs.append(TxOut(0, op_return_output_script))
 
     ## Create the transaction and sign it with the private key
