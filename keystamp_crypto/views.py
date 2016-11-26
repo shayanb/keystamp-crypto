@@ -221,11 +221,10 @@ def get_key(privatekey):
     print ("Bitcoin Address %s " % new_key.bitcoin_address())
     return new_key
 
-def op_return_this(privatekey, text):
+def op_return_this(privatekey, text, bitcoin_fee = 30000):
 
     bitcoin_keyobj = get_key(privatekey)
     bitcoin_address = bitcoin_keyobj.bitcoin_address()
-    bitcoin_fee = 30000 # In satoshis
 
     message = hexlify(text.encode()).decode('utf8')
 
@@ -297,14 +296,14 @@ def broadcast_tx_blockr(signed_tx):
 
 
 
-def noterizeme(request):
+def notarizeme(request):
     if request.method == 'POST':
-        print "noterizeme: %s" % request.POST
+        print "notarizeme: %s" % request.POST
         try:
             text = request.POST.get('text', None)
-            privatekey = os.environ.get('NOTERIZE_PRV', None)
+            privatekey = os.environ.get('NOTARIZE_PRV', None)
         except Exception, e:
-            print "failed noterizeme: %s " % e
+            print "failed notarizeme: %s " % e
             ret_json = {"status": "failed"}
             ret_json["message"] = e.message
             return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)

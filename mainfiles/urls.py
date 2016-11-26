@@ -13,13 +13,16 @@ urlpatterns = [
     url(r'^$', keystamp_crypto.views.index, name='index'),
     url(r'^hashme$', keystamp_crypto.views.hashme, name='hashme'),
 
+    url(r'^hash_string', keystamp_crypto.views.sha256_text, name='sha256_text'),
+
     url(r'^generate_master_seed', keystamp_crypto.views.generate_osc_key, name='generate_osc_key'),
 
     url(r'^generate_firm_key', keystamp_crypto.views.get_firm_key, name='get_firm_key'),
 
     url(r'^generate_advisor_key', keystamp_crypto.views.get_advisor_key, name='get_advisor_key'),
 
-    url(r'^hash_string', keystamp_crypto.views.sha256_text, name='sha256_text'),
+
+    url(r'^notarize', keystamp_crypto.views.notarizeme, name='notarizeme'),
 
     #    url(r'^listdocs', keystamp_crypto.views.list, name='list'),
 

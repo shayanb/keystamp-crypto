@@ -56,5 +56,10 @@ response  {'status': 'success', "xpub": xpub, "xprv": xprv,'path' : 'path'}
 
 
 
-
+### Notarization
+```
+# notarize and save the text to the Bitcoin blockchain
+/notarizeme HTTP POST {'text':'FINAL_HASH_TO_BE_SAVED_TO_BC'}
+response {"status":"success","tx_hash":'915a13827c1684b39ff9875b24efaebd239f815f54e2263fbb217ad5d'}
+```
 
