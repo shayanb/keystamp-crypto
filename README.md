@@ -32,7 +32,7 @@ response: {'status': 'success', 'hash': 'dbfdad915a13827c1684b39ff9875b24efaebd2
 ```
 ```
 # Hash string with SHA256
-/hash_string HTTP POST {"text" : "lorem test text"}
+/hashme_string HTTP POST {"text" : "lorem test text"}
 response: {'status': 'success', 'hash': 'dbfdad915a13827c1684b39ff9875b24efaebd239f815f54e2263fbb217ad5d2'}
 ```
 

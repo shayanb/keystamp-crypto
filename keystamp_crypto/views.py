@@ -35,23 +35,6 @@ def sha256_checksum(file, block_size=65536):
 
 
 
-def sha256_text(request):
-    if request.method == 'POST':
-        print "sha256_text: %s" % request.POST
-        try:
-            text = request.POST.get('text')
-            sha256 = hashlib.sha256()
-            sha256.update(text)
-        except Exception, e:
-            print "failed to get url %s " % e
-            return HttpResponse(json.dumps({"status": "failed", "reason": e.message}), content_type="application/json",
-                                status=400)
-
-        return HttpResponse(json.dumps({"status": "success", "hash": sha256.hexdigest()}), content_type="application/json",
-                                status=200)
-
-    return HttpResponse(json.dumps({"error": "no Get request"}), content_type="application/json", status=400)
-
 
 # Create your views here.
 def index(request):
@@ -82,6 +65,24 @@ def hashme(request):
         return HttpResponse(json.dumps(ret_json), content_type="application/json", status = 200)
 
     return HttpResponse(json.dumps({"error":"no Get request"}), content_type="application/json", status = 400)
+
+
+def sha256_text(request):
+    if request.method == 'POST':
+        print "sha256_text: %s" % request.POST
+        try:
+            text = request.POST.get('text')
+            sha256 = hashlib.sha256()
+            sha256.update(text)
+        except Exception, e:
+            print "failed to get url %s " % e
+            return HttpResponse(json.dumps({"status": "failed", "reason": e.message}), content_type="application/json",
+                                status=400)
+
+        return HttpResponse(json.dumps({"status": "success", "hash": sha256.hexdigest()}), content_type="application/json",
+                                status=200)
+
+    return HttpResponse(json.dumps({"error": "no Get request"}), content_type="application/json", status=400)
 
 
 ########################## Bitcoin Network stuff ##############################
@@ -299,8 +300,6 @@ def get_advisor_key(request):
 
 
 ########################## OP RETURN ##############################
-
-
 
 def get_key(privatekey):
     new_key = Key.from_text(privatekey)

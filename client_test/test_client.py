@@ -3,6 +3,7 @@ import sys
 from pycoin.key.BIP32Node import BIP32Node
 import subprocess
 
+import hashlib
 
 # zx9pu8Q3BZxRZhRLj
 # 138.197.141.252
@@ -34,7 +35,7 @@ except:
 
 #headers = {'Referer':'google.com'}
 
-def test_upload(file_url = None, URL = URL):
+def test_file_hash(file_url = None, URL = URL):
     URL += "/hashme"
     # if file_url is None
     r = requests.post(URL, data={"file_url": file_url}) #headers=headers)
@@ -46,6 +47,17 @@ def test_upload(file_url = None, URL = URL):
     else:
         print "FAILED"
 
+
+def test_string_hash(text = None, URL = URL):
+    URL += "/hashme_string"
+    # if file_url is None
+    r = requests.post(URL, data={"text": text}) #headers=headers)
+    print "%s \t %s" %(r.status_code, r.content)
+    r_json = r.json()
+    if r_json.get("hash", None) is not None:
+        print "PASSED"
+    else:
+        print "FAILED"
 
 
 def get_address_by_path(key, path):
@@ -138,7 +150,6 @@ def get_advisor_key(firm_key, advisor_id, URL= URL):
     print r
     return r
 
-import hashlib
 
 def sha256_checksum(text, block_size=65536):
     sha256 = hashlib.sha256()
@@ -159,7 +170,8 @@ def sha256_checksum(text, block_size=65536):
 
 # TEST SUIT
 #test_upload()
-test_upload(file_url="https://avatars3.githubusercontent.com/u/147330?v=3&s=52")
+test_file_hash(file_url="https://avatars3.githubusercontent.com/u/147330?v=3&s=52")
+test_string_hash(text="THIS IS A TEST TEXT TO BE HASHED")
 osc_key = get_osc_key()
 firm_key = get_firm_key(master_seed = osc_key.get("xprv"), firm_id = "32143")
 advisor_key = get_advisor_key(firm_key = firm_key.get("xprv"), advisor_id="12366")
