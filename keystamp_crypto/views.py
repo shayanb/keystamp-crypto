@@ -312,6 +312,11 @@ def notarizeme(request):
             print "failed noterizeme: text or privatekey is None "
             return HttpResponse(json.dumps({"status":"failed","message":"missing text or prvkey"}), content_type="application/json", status=400)
 
+        if len(text) > 80:
+            print "text is longer than 80 characters: %s : %s" %(len(text), text)
+            return HttpResponse(json.dumps({"status":"failed","message":"text is longer than 80 characters"}), content_type="application/json", status=400)
+
+
         tx_hash = op_return_this(privatekey, text)
 
         if not tx_hash:
