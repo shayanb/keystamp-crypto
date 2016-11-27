@@ -151,6 +151,8 @@ def broadcast_tx_blockcypher(signed_tx, netcode = COIN_NETWORK):
 
     payload = {'token':api_key}
     payload['tx'] = signed_tx
+
+    print "payload: %s" %payload
     try:
         request = requests.post(BLOCKCYPHER_URL_BROADCAST,
                             data=payload)
@@ -312,23 +314,25 @@ def get_key(privatekey):
     print ("Bitcoin Address %s " % new_key.bitcoin_address())
     return new_key
 
-def op_return_this(privatekey, text, bitcoin_fee = 30000):
+def op_return_this(privatekey, text, prefix = "KEYSTAMP", bitcoin_fee = 10000):
 
     bitcoin_keyobj = get_key(privatekey)
     bitcoin_address = bitcoin_keyobj.bitcoin_address()
 
-    message = hexlify(text.encode()).decode('utf8')
+    message = text#hexlify(text.encode()).decode('utf8')
 
     ## Get the spendable outputs we are going to use to pay the fee
     all_spendables = get_spendables_blockcypher(bitcoin_address)
     spendables = []
+    value = 0
     for unspent in all_spendables:
-        coin_value = unspent.get("value")
-        script = h2b(unspent.get("script_hex"))
-        previous_hash = h2b_rev(unspent.get("tx_hash"))
-        previous_index = unspent.get("index")
-        spendables.append(Spendable(coin_value, script, previous_hash, previous_index))
-
+        while value < bitcoin_fee + 10000:
+            coin_value = unspent.get("value")
+            script = h2b(unspent.get("script_hex"))
+            previous_hash = h2b_rev(unspent.get("tx_hash"))
+            previous_index = unspent.get("index")
+            spendables.append(Spendable(coin_value, script, previous_hash, previous_index))
+            value += coin_value
 
     bitcoin_sum = sum(spendable.coin_value for spendable in spendables)
     if(bitcoin_sum < bitcoin_fee):
@@ -337,7 +341,6 @@ def op_return_this(privatekey, text, bitcoin_fee = 30000):
 
     ## Create the inputs we are going to use
     inputs = [spendable.tx_in() for spendable in spendables]
-
     ## If we will have change left over create an output to send it back
     outputs = []
     if (bitcoin_sum > bitcoin_fee):
@@ -345,13 +348,13 @@ def op_return_this(privatekey, text, bitcoin_fee = 30000):
         total_amout = bitcoin_sum - bitcoin_fee
         outputs.append(TxOut(total_amout - bitcoin_fee, change_output_script))
 
-        home_address = standard_tx_out_script(bitcoin_address)
-        if (bitcoin_sum - bitcoin_fee) > 100000:
-            outputs.append(TxOut(100000, home_address))
-        else:
-            outputs.append(TxOut((bitcoin_sum - bitcoin_fee) / 2, home_address))
+        # home_address = standard_tx_out_script(bitcoin_address)
+        # #TODO: it needs some love and IQ on input mananagement stuff
+        # outputs.append(TxOut((bitcoin_sum - bitcoin_fee), home_address))
 
     ## Build the OP_RETURN output with our message
+    if prefix is not None and len(message) < 80 - len(prefix):
+        message = prefix + ":" + message
     op_return_output_script = tools.compile("OP_RETURN %s" % message)
     outputs.append(TxOut(0, op_return_output_script))
 
@@ -360,12 +363,12 @@ def op_return_this(privatekey, text, bitcoin_fee = 30000):
     # print tx.as_hex()
     # print spendables
     tx.set_unspents(spendables)
-    signed_tx = sign_tx(tx, wifs=[privatekey])
+    sign_tx(tx, wifs=[privatekey])
 
-    print "singed_tx: %s" %signed_tx.as_hex()
+    print "singed_tx: %s" %tx.as_hex()
 
     #TODO: uncomment this when its ready to push data to blockchian
-    tx_hash = broadcast_tx_blockcypher(signed_tx.as_hex())
+    tx_hash = broadcast_tx_blockr(tx.as_hex())
     return tx_hash
 
 
