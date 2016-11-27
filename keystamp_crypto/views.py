@@ -314,7 +314,7 @@ def get_key(privatekey):
     print ("Bitcoin Address %s " % new_key.bitcoin_address())
     return new_key
 
-def op_return_this(privatekey, text, prefix = "KEYSTAMP", bitcoin_fee = 10000):
+def op_return_this(privatekey, text, prefix = "KEYSTAMP:", bitcoin_fee = 10000):
 
     bitcoin_keyobj = get_key(privatekey)
     bitcoin_address = bitcoin_keyobj.bitcoin_address()
@@ -353,8 +353,9 @@ def op_return_this(privatekey, text, prefix = "KEYSTAMP", bitcoin_fee = 10000):
         # outputs.append(TxOut((bitcoin_sum - bitcoin_fee), home_address))
 
     ## Build the OP_RETURN output with our message
-    if prefix is not None and len(message) < 80 - len(prefix):
-        message = prefix + ":" + message
+    if prefix is not None and len(message) + len(prefix) <= 80:
+        message = prefix + message
+
     op_return_output_script = tools.compile("OP_RETURN %s" % message)
     outputs.append(TxOut(0, op_return_output_script))
 
