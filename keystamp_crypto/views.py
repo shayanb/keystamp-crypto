@@ -262,6 +262,8 @@ def generate_osc_key(request):
     except Exception, e:
         ret_json = {"status": "failed"}
         ret_json["message"] = e.message
+        print "result: %s" %ret_json
+
         return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
 
 
@@ -282,6 +284,7 @@ def get_firm_key(request):
 
         ret_json = firm_key
         ret_json["status"] = "success"
+        print "result: %s" %ret_json
         return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
 
 
@@ -301,6 +304,8 @@ def get_advisor_key(request):
 
         ret_json = advisor_key
         ret_json["status"] = "success"
+        print "result: %s" %ret_json
+
         return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
 
 ########################## / BIP32 stuff ##############################
