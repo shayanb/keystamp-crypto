@@ -346,7 +346,7 @@ def op_return_this(privatekey, text, prefix = "KEYSTAMP", bitcoin_fee = 10000):
     if (bitcoin_sum > bitcoin_fee):
         change_output_script = standard_tx_out_script(bitcoin_address)
         total_amout = bitcoin_sum - bitcoin_fee
-        outputs.append(TxOut(total_amout - bitcoin_fee, change_output_script))
+        outputs.append(TxOut(total_amout, change_output_script))
 
         # home_address = standard_tx_out_script(bitcoin_address)
         # #TODO: it needs some love and IQ on input mananagement stuff
