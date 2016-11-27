@@ -319,7 +319,7 @@ def op_return_this(privatekey, text, prefix = "KEYSTAMP", bitcoin_fee = 10000):
     bitcoin_keyobj = get_key(privatekey)
     bitcoin_address = bitcoin_keyobj.bitcoin_address()
 
-    message = text#hexlify(text.encode()).decode('utf8')
+    message = hexlify(text.encode()).decode('utf8')
 
     ## Get the spendable outputs we are going to use to pay the fee
     all_spendables = get_spendables_blockcypher(bitcoin_address)
