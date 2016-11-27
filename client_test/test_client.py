@@ -46,6 +46,7 @@ def test_file_hash(file_url = None, URL = URL):
         print "PASSED"
     else:
         print "FAILED"
+    return r_json
 
 
 def test_string_hash(text = None, URL = URL):
@@ -175,6 +176,23 @@ def test_hash_validation(txid, URL = URL):
     return r
 
 
+def test_file_url_txid_validation(file_url, txid, URL = URL):
+    URL += '/validate_file_url'
+    r = requests.post(URL, data={"file_url":file_url, "txid" : txid}).json()
+    print r
+    return r
+
+
+
+def test_complete_verification_round(file_url = "https://avatars3.githubusercontent.com/u/147330?v=3&s=52"):
+    file_hash = test_file_hash(file_url=file_url)
+    test_notarize(text = file_hash)
+    txid = raw_input("Enter the txid when it confirmed: ")
+    test_hash_validation(txid=txid)
+    test_file_url_txid_validation(file_url = file_url, txid = txid)
+
+
+
 #mist TEsts
 #create_newkey()
 # firm_id = "12345"
@@ -184,11 +202,14 @@ def test_hash_validation(txid, URL = URL):
 
 # TEST SUIT
 #test_upload()
-test_file_hash(file_url="https://avatars3.githubusercontent.com/u/147330?v=3&s=52")
-test_hash = test_string_hash(text="THIS IS A TEST TEXT TO BE HASHED")
+# test_file_hash(file_url="https://avatars3.githubusercontent.com/u/147330?v=3&s=52")
+# test_hash = test_string_hash(text="THIS IS A TEST TEXT TO BE HASHED")
 # osc_key = get_osc_key()
 # firm_key = get_firm_key(master_seed = osc_key.get("xprv"), firm_id = "32143")
 # advisor_key = get_advisor_key(firm_key = firm_key.get("xprv"), advisor_id="12366")
 
 #test_notarize(text = test_hash)
-test_hash_validation(txid="e3fe5b2020772193026af9e790a134bc3404e8c74454be46aa7f6d11035f642c")
+# test_hash_validation(txid="e3fe5b2020772193026af9e790a134bc3404e8c74454be46aa7f6d11035f642c")
+test_complete_verification_round()
+
+#TODO: make an endpont that gets a file url and a txid and checks if both hashes are the same!

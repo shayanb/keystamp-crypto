@@ -26,6 +26,8 @@ urlpatterns = [
 
     url(r'^get_hash_from_bc', keystamp_crypto.views.get_hash_from_txid, name='get_hash_from_txid'),
 
+    url(r'^validate_file_url', keystamp_crypto.views.validate_file, name='validate_file'),
+
     #    url(r'^listdocs', keystamp_crypto.views.list, name='list'),
 
     # url(r'^db', hello.views.db, name='db'),

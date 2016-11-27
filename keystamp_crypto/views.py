@@ -49,28 +49,31 @@ def index(request):
 
 
 
-def hashme(request):
-    if request.method == 'POST':
-        print "hashme: %s" %request.POST
-        try:
-            file_url = request.POST.get('file_url', "http://blog.theshayan.com/wp-content/uploads/2015/11/3-940x429.png")
-            r = urllib2.urlopen(file_url)
-        except Exception, e:
-            print "failed to get url %s " %e
-            return HttpResponse(json.dumps({"status":"failed", "reason": e.message}), content_type="application/json", status = 400)
+def hashme(request, file_url = None, internal = False):
+    if (file_url is None) and (request.method != 'POST'):
+        return HttpResponse(json.dumps({"error": "no Get request"}), content_type="application/json", status=400)
 
-        ret_json = {}
-        if request.POST.get('file_url', None) is None:
-            ret_json['file_url_missing'] = 'using_testimage'
-            ret_json["status"] = "default"
+    print "hashme: %s" %request.POST
+    try:
+        file_url = request.POST.get('file_url', "http://blog.theshayan.com/wp-content/uploads/2015/11/3-940x429.png")
+        r = urllib2.urlopen(file_url)
+    except Exception, e:
+        print "failed to get url %s " %e
+        return HttpResponse(json.dumps({"status":"failed", "reason": e.message}), content_type="application/json", status = 400)
 
-        file_hash = sha256_checksum(r)
-        ret_json["hash"] = file_hash
-        ret_json["status"] = "success"
-        print ret_json
-        return HttpResponse(json.dumps(ret_json), content_type="application/json", status = 200)
+    ret_json = {}
+    if request.POST.get('file_url', None) is None:
+        ret_json['file_url_missing'] = 'using_testimage'
+        ret_json["status"] = "default"
 
-    return HttpResponse(json.dumps({"error":"no Get request"}), content_type="application/json", status = 400)
+    file_hash = sha256_checksum(r)
+    ret_json["hash"] = file_hash
+    ret_json["status"] = "success"
+    print ret_json
+    if internal:
+        return ret_json
+    return HttpResponse(json.dumps(ret_json), content_type="application/json", status = 200)
+
 
 
 def sha256_text(request):
@@ -211,24 +214,6 @@ def get_opreturn_from_tx_blockr(tx):
     except Exception, E:
         print ("Failed to get %s - %s from blockr" % (tx, E))
         return None
-
-
-
-def get_hash_from_txid(request):
-    if request.method == 'POST':
-        print "get_hash_from_txid: %s" % request.POST
-        try:
-            txid = request.POST.get('txid', None)
-            saved_hash = get_opreturn_from_tx_blockr(txid)
-            ret_json = {"status": "success"}
-            ret_json["hash"] = saved_hash
-            return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
-        except Exception, e:
-            print "failed get_firm_key: %s " % e
-            ret_json = {"status": "failed"}
-            ret_json["message"] = e.message
-            return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
-
 
 ########################## / Bitcoin Network stuff ##############################
 
@@ -378,7 +363,6 @@ def op_return_this(privatekey, text, prefix = "KEYSTAMP:", bitcoin_fee = 10000):
     bitcoin_keyobj = get_key(privatekey)
     bitcoin_address = bitcoin_keyobj.bitcoin_address()
 
-
     ## Get the spendable outputs we are going to use to pay the fee
     all_spendables = get_spendables_blockcypher(bitcoin_address)
     spendables = []
@@ -488,6 +472,64 @@ def notarizeme(request):
 
         return HttpResponse(json.dumps({"status":"success","txid":tx_hash}), content_type="application/json", status=200)
 
-
+def get_hash_from_txid(request, internal = False):
+    if request.method == 'POST':
+        print "get_hash_from_txid: %s" % request.POST
+        try:
+            txid = request.POST.get('txid', None)
+            saved_hash = get_opreturn_from_tx_blockr(txid)
+            ret_json = {"status": "success"}
+            ret_json["hash"] = saved_hash
+            if internal:
+                return ret_json
+            return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
+        except Exception, e:
+            print "failed get_firm_key: %s " % e
+            ret_json = {"status": "failed"}
+            ret_json["message"] = e.message
+            if internal:
+                return False
+            return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
 
 ########################## / OP RETURN ##############################
+
+
+########################## Validation ##############################
+
+def validate_file(request):
+    if request.method == 'POST':
+        print "validate_file: %s" % request.POST
+        try:
+            file_url = request.POST.get('file_url',None)
+            txid = request.POST.get('txid',None)
+        except Exception, e:
+            print "failed to get url %s " % e
+            return HttpResponse(json.dumps({"status": "failed", "reason": e.message}), content_type="application/json",
+                                status=400)
+
+        if file_url is None and txid is None:
+            print "failed validate_file: file_url or txid is None"
+            return HttpResponse(json.dumps({"status":"failed","message":"missing file_url or txid"}), content_type="application/json", status=400)
+
+
+        file_url_hash = hashme(request, internal = True)
+        txid_hash = get_hash_from_txid(request, internal = True)
+
+        ret_json = {}
+        ret_json["file_url"]  = file_url
+        ret_json["txid"] = txid
+        ret_json["status"] = "success"
+        ret_json["txid_hash"] = txid_hash
+        ret_json["file_url_hash"] = file_url_hash
+        if file_url_hash == txid_hash:
+            ret_json["verified"] = True
+        else:
+            ret_json["verified"] = False
+
+        return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
+
+
+
+########################## / Validation ##############################
+
+

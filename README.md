@@ -59,14 +59,20 @@ response  {'status': 'success', "xpub": xpub, "xprv": xprv,'path' : 'path'}
 ```
 # notarize and save the text to the Bitcoin blockchain. text is limited to 80 characters
 /notarizeme HTTP POST {'text':'FINAL_HASH_TO_BE_SAVED_TO_BC'}
-response {"status":"success","txid":'915a13827c1684b39ff9875b24efaebd239f815f54e2263fbb217ad5d'}
+response {"status":"success","txid":'THE_TRANSACTION_ID_OF_THE_TRANSACTION_CONTAINING_THE_HASH'}
 ```
 
 
 ### Validation
 ```
 # retreive hash stored in txid
-/get_hash_from_bc HTTP POST {'txid': '915a13827c1684b39ff9875b24efaebd239f815f54e2263fbb217ad5d'}
-response {"status":"succes","hash": 'THE_HASH_OF_THE_SAVED_DOCUMENT_IN_BLOCKCHAIN'}
+/get_hash_from_bc HTTP POST {'txid': 'THE_TRANSACTION_ID_OF_THE_TRANSACTION_CONTAINING_THE_HASH'}
+response {"status":"success","hash": 'THE_HASH_OF_THE_SAVED_DOCUMENT_IN_BLOCKCHAIN'}
 ```
 
+```
+# verify if a file (file_url) and a txid has the same hash. (Note: Verified is the final flag that should be checked)
+/validate_file_url HTTP POST {'file_url': "http://site.com/image.jpg", 'txid': '915a13827c1684b39ff9875b24efaebd239f815f54e2263fbb217ad5d'}
+response {'status':success',  'verified':True, 'txid_hash':'THE_HASH_THAT_WAS_SAVED_TO_BC','file_url_hash':'HASH_OF_THE_FILE' ,'file_url': "http://site.com/image.jpg", 'txid': '915a13827c1684b39ff9875b24efaebd239f815f54e2263fbb217ad5d'}
+```
+Did we just cryptographically proved `THE_HASH_THAT_WAS_SAVED_TO_BC = HASH_OF_THE_FILE` ? return verified # :)
