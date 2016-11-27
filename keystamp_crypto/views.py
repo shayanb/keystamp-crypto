@@ -442,36 +442,6 @@ def broadcast_tx_blockr(signed_tx):
         return False
 
 
-
-
-def notarizeme(request):
-    if request.method == 'POST':
-        print "notarizeme: %s" % request.POST
-        try:
-            text = request.POST.get('text', None)
-            privatekey = os.environ.get('NOTARIZE_PRV', None)
-        except Exception, e:
-            print "failed notarizeme: %s " % e
-            ret_json = {"status": "failed"}
-            ret_json["message"] = e.message
-            return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
-
-        if text is None or privatekey is None:
-            print "failed noterizeme: text or privatekey is None "
-            return HttpResponse(json.dumps({"status":"failed","message":"missing text or prvkey"}), content_type="application/json", status=400)
-
-        if len(text) > 80:
-            print "text is longer than 80 characters: %s : %s" %(len(text), text)
-            return HttpResponse(json.dumps({"status":"failed","message":"text is longer than 80 characters"}), content_type="application/json", status=400)
-
-
-        tx_hash = op_return_this(privatekey, text)
-
-        if not tx_hash:
-            return HttpResponse(json.dumps({"status":"failed","message":"failed to broadcast"}), content_type="application/json", status=400)
-
-        return HttpResponse(json.dumps({"status":"success","txid":tx_hash}), content_type="application/json", status=200)
-
 def get_hash_from_txid(request, internal = False):
     if request.method == 'POST':
         print "get_hash_from_txid: %s" % request.POST
@@ -492,6 +462,79 @@ def get_hash_from_txid(request, internal = False):
             return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
 
 ########################## / OP RETURN ##############################
+
+
+
+########################## / Notarization ##############################
+
+
+def notarizeme(request, internal = False):
+    if request.method == 'POST':
+        print "notarizeme: %s" % request.POST
+        try:
+            text = request.POST.get('text', None)
+            privatekey = os.environ.get('NOTARIZE_PRV', None)
+        except Exception, e:
+            print "failed notarizeme: %s " % e
+            ret_json = {"status": "failed"}
+            ret_json["message"] = e.message
+            return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
+
+        if text is None or privatekey is None:
+            print "failed noterizeme: text or privatekey is None "
+            return HttpResponse(json.dumps({"status":"failed","message":"missing text or prvkey"}), content_type="application/json", status=400)
+
+        if len(text) > 80:
+            print "text is longer than 80 characters: %s : %s" %(len(text), text)
+            return HttpResponse(json.dumps({"status":"failed","message":"text is longer than 80 characters"}), content_type="application/json", status=400)
+
+        tx_hash = op_return_this(privatekey, text)
+
+        if internal:
+            return {"txid": tx_hash}
+
+        if not tx_hash:
+            return HttpResponse(json.dumps({"status":"failed","message":"failed to broadcast"}), content_type="application/json", status=400)
+
+        return HttpResponse(json.dumps({"status":"success","txid":tx_hash}), content_type="application/json", status=200)
+
+
+def notarize_this_transaction(request):
+    if request.method == 'POST':
+        print "notarize_this_transaction: %s" % request.POST
+        try:
+            file_url = request.POST.get('file_url', None)
+            file_hash = request.POST.get('file_hash', None) #TODO: one of these two !
+            advisor_signature = request.POST.get('signature', None)
+            client_authorization = request.POST.get('client_auth', None)
+            privatekey = os.environ.get('NOTARIZE_PRV', None)
+
+        except Exception, e:
+            print "failed to get url %s " % e
+            return HttpResponse(json.dumps({"status": "failed", "reason": e.message}), content_type="application/json",
+                                status=400)
+
+        if file_url is not None:
+            file_hash = hashme(request, file_url=file_url, internal=True).get("hash")
+
+        final_key = file_hash+":"+advisor_signature+":"+str(client_authorization).encode('utf-8')
+
+        #TODO: seperate this into another function
+        final_keystamp = hashlib.sha256()
+        final_keystamp.update(final_key)
+
+        print "Final_key: %s \t Final_Keystamp: %s" %(final_key, final_keystamp)
+        tx_hash = op_return_this(privatekey, final_keystamp)
+        print "txid: %s" %tx_hash
+        if not tx_hash:
+            return HttpResponse(json.dumps({"status": "failed", "message": "failed to broadcast"}),
+                                content_type="application/json", status=400)
+
+        return HttpResponse(json.dumps({"status": "success", "txid": tx_hash, "final_key": final_key }), content_type="application/json",
+                            status=200)
+
+
+########################## / Notarization ##############################
 
 
 ########################## Validation ##############################

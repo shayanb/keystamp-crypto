@@ -2,7 +2,7 @@
 
 
 need heroku project access
-inside project directory run
+Inside project directory run
 
 locally:
 ```
@@ -21,8 +21,9 @@ heroku config:set blockcypher_api_key=blockcypher_api_key
 ===========================
 
 
-Test local: `python test_client.py`
-Test heroku: `python test_client.py online`
+Test local server: `python test_client.py local`
+
+Test heroku: `python test_client.py`
 
 
 
@@ -64,7 +65,6 @@ response  {'status': 'success', "xpub": xpub, "xprv": xprv,'path' : 'path'}
 ```
 
 
-
 ### Notarization
 ```
 # notarize and save the text to the Bitcoin blockchain. text is limited to 80 characters
@@ -86,3 +86,13 @@ response {"status":"success","hash": 'THE_HASH_OF_THE_SAVED_DOCUMENT_IN_BLOCKCHA
 response {'status':success',  'verified':True, 'txid_hash':'THE_HASH_THAT_WAS_SAVED_TO_BC','file_url_hash':'HASH_OF_THE_FILE' ,'file_url': "http://site.com/image.jpg", 'txid': '915a13827c1684b39ff9875b24efaebd239f815f54e2263fbb217ad5d'}
 ```
 Did we just cryptographically proved `THE_HASH_THAT_WAS_SAVED_TO_BC = HASH_OF_THE_FILE` ? return verified # :)
+
+
+## make it do this for you
+```
+# gets the final puzzle pieces and puts them together
+/notarize_this HTTP POST
+{'file_url':'http://site.com/contract.pdf', 'advisor_signature':'SIGNATURE_OF_DOCUMENTHASH_USER_RECEIPT_WITH_ADVISORS_PRIVATE_KEY', 'client_authorization':'TWILLIO_CODE_OR_ANY_OTHER_AUTHORIZATION_RECEIPT'}
+note that you can send `file_hash` instead of `file_url`
+response: {"status": "success", "txid": tx_hash, "final_key": 'FILE_HASH:POST:TWILLIO_CODE_OR_ANY_OTHER_AUTHORIZATION_RECEIPT'.encode('utf-8') }
+```

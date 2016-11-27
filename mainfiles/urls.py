@@ -28,6 +28,8 @@ urlpatterns = [
 
     url(r'^validate_file_url', keystamp_crypto.views.validate_file, name='validate_file'),
 
+    url(r'^notarize_this', keystamp_crypto.views.notarize_this_transaction, name='notarize_this_transaction'),
+
     #    url(r'^listdocs', keystamp_crypto.views.list, name='list'),
 
     # url(r'^db', hello.views.db, name='db'),
