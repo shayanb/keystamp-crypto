@@ -94,5 +94,5 @@ Did we just cryptographically proved `THE_HASH_THAT_WAS_SAVED_TO_BC = HASH_OF_TH
 /notarize_this HTTP POST
 {'file_url':'http://site.com/contract.pdf', 'advisor_signature':'SIGNATURE_OF_DOCUMENTHASH_USER_RECEIPT_WITH_ADVISORS_PRIVATE_KEY', 'client_authorization':'TWILLIO_CODE_OR_ANY_OTHER_AUTHORIZATION_RECEIPT'}
 note that you can send `file_hash` instead of `file_url`
-response: {"status": "success", "txid": tx_hash, "final_key": 'FILE_HASH:POST:TWILLIO_CODE_OR_ANY_OTHER_AUTHORIZATION_RECEIPT'.encode('utf-8') }
+response: {"status": "success", "keystamp":"HASH_OF_FINAL_KEY_THAT_IS_SAVED_ON_BC", "txid": tx_hash, "final_key": 'FILE_HASH:POST:TWILLIO_CODE_OR_ANY_OTHER_AUTHORIZATION_RECEIPT'.encode('utf-8') }
 ```

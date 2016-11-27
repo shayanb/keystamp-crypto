@@ -530,7 +530,7 @@ def notarize_this_transaction(request):
             return HttpResponse(json.dumps({"status": "failed", "message": "failed to broadcast"}),
                                 content_type="application/json", status=400)
 
-        return HttpResponse(json.dumps({"status": "success", "txid": tx_hash, "final_key": final_key }), content_type="application/json",
+        return HttpResponse(json.dumps({"status": "success", "keystamp":final_keystamp, "txid": tx_hash, "final_key": final_key }), content_type="application/json",
                             status=200)
 
 
