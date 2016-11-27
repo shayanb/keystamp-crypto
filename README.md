@@ -1,33 +1,6 @@
 # keystamp-crypto
 
-
-need heroku project access
-Inside project directory run
-
-locally:
-```
-export NOTARIZE_PRV=MAIN_NOTARIZER_PRIVATE_KEY
-export blockcypher_api_key=blockcypher_api_key
-python manage.py runserver 0.0.0.0:5000
-```
-
-Deply:
-```
-git push heroku master
-heroku config:set NOTARIZE_PRV=MAIN_NOTARIZER_PRIVATE_KEY
-heroku config:set blockcypher_api_key=blockcypher_api_key
-
-```
-===========================
-
-
-Test local server: `python test_client.py local`
-
-Test heroku: `python test_client.py`
-
-
-
-# API
+## API
 
 BASE_URL = https://reghackto.herokuapp.com
 
