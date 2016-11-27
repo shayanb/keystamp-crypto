@@ -4,10 +4,20 @@
 need heroku project access
 inside project directory run
 
-local: `python manage.py runserver 0.0.0.0:5000`
+locally:
+```
+export NOTARIZE_PRV=MAIN_NOTARIZER_PRIVATE_KEY
+export blockcypher_api_key=blockcypher_api_key
+python manage.py runserver 0.0.0.0:5000
+``
 
-Deply: `git push heroku master`
+Deply:
+```
+git push heroku master
+heroku config:set NOTARIZE_PRV=MAIN_NOTARIZER_PRIVATE_KEY
+heroku config:set blockcypher_api_key=blockcypher_api_key
 
+```
 ===========================
 
 
