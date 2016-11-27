@@ -59,6 +59,14 @@ response  {'status': 'success', "xpub": xpub, "xprv": xprv,'path' : 'path'}
 ```
 # notarize and save the text to the Bitcoin blockchain. text is limited to 80 characters
 /notarizeme HTTP POST {'text':'FINAL_HASH_TO_BE_SAVED_TO_BC'}
-response {"status":"success","tx_hash":'915a13827c1684b39ff9875b24efaebd239f815f54e2263fbb217ad5d'}
+response {"status":"success","txid":'915a13827c1684b39ff9875b24efaebd239f815f54e2263fbb217ad5d'}
+```
+
+
+### Validation
+```
+# retreive hash stored in txid
+/get_hash_from_bc HTTP POST {'txid': '915a13827c1684b39ff9875b24efaebd239f815f54e2263fbb217ad5d'}
+response {"status":"succes","hash": 'THE_HASH_OF_THE_SAVED_DOCUMENT_IN_BLOCKCHAIN'}
 ```
 

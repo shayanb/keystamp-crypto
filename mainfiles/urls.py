@@ -24,6 +24,8 @@ urlpatterns = [
 
     url(r'^notarize', keystamp_crypto.views.notarizeme, name='notarizeme'),
 
+    url(r'^get_hash_from_bc', keystamp_crypto.views.get_hash_from_txid, name='get_hash_from_txid'),
+
     #    url(r'^listdocs', keystamp_crypto.views.list, name='list'),
 
     # url(r'^db', hello.views.db, name='db'),

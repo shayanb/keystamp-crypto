@@ -19,7 +19,7 @@ from pycoin.tx import Tx
 from pycoin.tx.script import tools
 from pycoin.tx.tx_utils import sign_tx
 from pycoin.tx.TxOut import TxOut, standard_tx_out_script
-from binascii import hexlify
+from binascii import hexlify, unhexlify
 from pycoin.key import Key
 from pycoin.tx import Spendable
 
@@ -108,7 +108,6 @@ def get_spendables_blockcypher(address, netcode = COIN_NETWORK, txn_limit=200, a
 
     url = BLOCKCYPHER_URL_ADDRESS + address + "?unspentOnly=true&token=%s&includeScript=true&confirmations=0" %(api_key)
 
-
     try:
         request = requests.get(url)
 
@@ -118,7 +117,6 @@ def get_spendables_blockcypher(address, netcode = COIN_NETWORK, txn_limit=200, a
     except Exception, E:
         print ('Failed to fetch a url %s : %s' % (url, E))
         return []
-        #raise ValueError('Failed to fetch a url %s - %s' % (url,data))
 
     all_spendables = []
     for txn in result_json.get("txrefs", []):
@@ -174,6 +172,62 @@ def broadcast_tx_blockcypher(signed_tx, netcode = COIN_NETWORK):
     except Exception:
         print ("invalid broadcast respond from blockcypher: %s" % result)
         return False
+
+
+def get_opreturn_from_tx_blockr(tx):
+    '''
+    get transaction OP return of a transaction from blockr.io
+    '''
+    BLOCKR_URL_TXINFO = "https://btc.blockr.io/api/v1/tx/info/"
+
+    url = BLOCKR_URL_TXINFO + str(tx)
+    try:
+        result1 = requests.get(url)
+        request = result1.content
+        r = json.loads(request)
+        r["data"] = r.get("data", {})
+        vouts = r["data"].get("vouts", [])
+        for output in vouts:
+            # print output
+            try:
+                asm_script = output.get("extras").get("asm")
+                if "OP_CHECKMULTISIG" in asm_script:
+                    pass
+                else:
+                    try:
+                        message = unhexlify(asm_script[10:]).decode('utf8')
+                    except Exception, e:
+                        print ("not a utf8 message: hex: %s" % asm_script[10:])
+                        pass
+
+                    if message:
+                        print ("message: %s" % message)
+                        return message.split(":")[1]
+                        # tweet here:
+
+            except:
+                pass
+                # return ret_json
+    except Exception, E:
+        print ("Failed to get %s - %s from blockr" % (tx, E))
+        return None
+
+
+
+def get_hash_from_txid(request):
+    if request.method == 'POST':
+        print "get_hash_from_txid: %s" % request.POST
+        try:
+            txid = request.POST.get('txid', None)
+            saved_hash = get_opreturn_from_tx_blockr(txid)
+            ret_json = {"status": "success"}
+            ret_json["hash"] = saved_hash
+            return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
+        except Exception, e:
+            print "failed get_firm_key: %s " % e
+            ret_json = {"status": "failed"}
+            ret_json["message"] = e.message
+            return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
 
 
 ########################## / Bitcoin Network stuff ##############################
@@ -432,7 +486,7 @@ def notarizeme(request):
         if not tx_hash:
             return HttpResponse(json.dumps({"status":"failed","message":"failed to broadcast"}), content_type="application/json", status=400)
 
-        return HttpResponse(json.dumps({"status":"success","tx_hash":tx_hash}), content_type="application/json", status=200)
+        return HttpResponse(json.dumps({"status":"success","txid":tx_hash}), content_type="application/json", status=200)
 
 
 

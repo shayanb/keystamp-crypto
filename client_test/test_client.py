@@ -167,12 +167,18 @@ def test_notarize(text, URL = URL):
     print r
     return r
 
+
+def test_hash_validation(txid, URL = URL):
+    URL += '/get_hash_from_bc'
+    r = requests.post(URL, data={"txid" : txid}).json()
+    print r
+    return r
+
+
 #mist TEsts
 #create_newkey()
 # firm_id = "12345"
 # print  "%s/%s" % (firm_id[:3], firm_id[3:])
-
-
 
 
 
@@ -184,5 +190,5 @@ test_hash = test_string_hash(text="THIS IS A TEST TEXT TO BE HASHED")
 # firm_key = get_firm_key(master_seed = osc_key.get("xprv"), firm_id = "32143")
 # advisor_key = get_advisor_key(firm_key = firm_key.get("xprv"), advisor_id="12366")
 
-
-test_notarize(text = test_hash)
+#test_notarize(text = test_hash)
+test_hash_validation(txid="e3fe5b2020772193026af9e790a134bc3404e8c74454be46aa7f6d11035f642c")
