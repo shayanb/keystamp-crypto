@@ -106,7 +106,7 @@ def get_spendables_blockcypher(address, netcode = COIN_NETWORK, txn_limit=200, a
 
     print ("blockcypher spendable for %s" %address)
 
-    url = BLOCKCYPHER_URL_ADDRESS + address + "?unspentOnly=true&token=%s&includeScript=true" %(api_key)
+    url = BLOCKCYPHER_URL_ADDRESS + address + "?unspentOnly=true&token=%s&includeScript=true&confirmations=0" %(api_key)
 
 
     try:
@@ -273,13 +273,13 @@ def get_firm_key(request):
             master_key = request.POST.get('osc_key', None)
             firm_id = str(request.POST.get('firm_id', None))
             path = "%s/%s" % (firm_id[:3] + "H", firm_id[3:] + "H")
+            firm_key = get_xprv_by_path(master_key, path)
         except Exception, e:
             print "failed get_firm_key: %s " %e
             ret_json = {"status": "failed"}
             ret_json["message"] = e.message
             return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
 
-        firm_key = get_xprv_by_path(master_key, path)
         ret_json = firm_key
         ret_json["status"] = "success"
         return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
@@ -292,13 +292,13 @@ def get_advisor_key(request):
             master_key = request.POST.get('firm_key', None)
             firm_id = str(request.POST.get('advisor_id', None))
             path = "%s/%s" % (firm_id[:3], firm_id[3:])
+            advisor_key = get_xprv_by_path(master_key, path)
         except Exception, e:
             print "failed get_advisor_key: %s " % e
             ret_json = {"status": "failed"}
             ret_json["message"] = e.message
             return HttpResponse(json.dumps(ret_json), content_type="application/json", status=400)
 
-        advisor_key = get_xprv_by_path(master_key, path)
         ret_json = advisor_key
         ret_json["status"] = "success"
         return HttpResponse(json.dumps(ret_json), content_type="application/json", status=200)
@@ -319,7 +319,6 @@ def op_return_this(privatekey, text, prefix = "KEYSTAMP:", bitcoin_fee = 10000):
     bitcoin_keyobj = get_key(privatekey)
     bitcoin_address = bitcoin_keyobj.bitcoin_address()
 
-    message = hexlify(text.encode()).decode('utf8')
 
     ## Get the spendable outputs we are going to use to pay the fee
     all_spendables = get_spendables_blockcypher(bitcoin_address)
@@ -353,8 +352,10 @@ def op_return_this(privatekey, text, prefix = "KEYSTAMP:", bitcoin_fee = 10000):
         # outputs.append(TxOut((bitcoin_sum - bitcoin_fee), home_address))
 
     ## Build the OP_RETURN output with our message
-    if prefix is not None and len(message) + len(prefix) <= 80:
-        message = prefix + message
+    if prefix is not None and (len(text) + len(prefix) <= 80):
+        text = prefix + text
+
+    message = hexlify(text.encode()).decode('utf8')
 
     op_return_output_script = tools.compile("OP_RETURN %s" % message)
     outputs.append(TxOut(0, op_return_output_script))
