@@ -185,7 +185,7 @@ def test_file_url_txid_validation(file_url, txid, URL = URL):
 
 
 def test_complete_verification_round(file_url = "https://avatars3.githubusercontent.com/u/147330?v=3&s=52"):
-    file_hash = test_file_hash(file_url=file_url)
+    file_hash = test_file_hash(file_url=file_url).get("hash")
     test_notarize(text = file_hash)
     txid = raw_input("Enter the txid when it confirmed: ")
     test_hash_validation(txid=txid)

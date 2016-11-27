@@ -519,8 +519,8 @@ def validate_file(request):
         ret_json["file_url"]  = file_url
         ret_json["txid"] = txid
         ret_json["status"] = "success"
-        ret_json["txid_hash"] = txid_hash
-        ret_json["file_url_hash"] = file_url_hash
+        ret_json["txid_hash"] = txid_hash.get("hash", None)
+        ret_json["file_url_hash"] = file_url_hash.get("hash", None)
         if file_url_hash == txid_hash:
             ret_json["verified"] = True
         else:
