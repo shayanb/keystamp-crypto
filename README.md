@@ -9,7 +9,7 @@ locally:
 export NOTARIZE_PRV=MAIN_NOTARIZER_PRIVATE_KEY
 export blockcypher_api_key=blockcypher_api_key
 python manage.py runserver 0.0.0.0:5000
-``
+```
 
 Deply:
 ```
