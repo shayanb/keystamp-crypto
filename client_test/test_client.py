@@ -188,9 +188,39 @@ def test_complete_verification_round(file_url = "https://avatars3.githubusercont
     file_hash = test_file_hash(file_url=file_url).get("hash")
     test_notarize(text = file_hash)
     txid = raw_input("Enter the txid when it confirmed: ")
-    test_hash_validation(txid=txid)
+    hash_validation_resp = test_hash_validation(txid=txid)
     test_file_url_txid_validation(file_url = file_url, txid = txid)
 
+
+
+
+def test_complete_verification_round_demo(file_url = "https://github.com/shayanb/keystamp-crypto/raw/master/KEYSTAMP_whitepaper.pdf"):
+    from time import sleep
+    file_hash = test_file_hash(file_url=file_url).get("hash")
+    print " = " * 20
+    print "Keystamp.pdf hash: %s" %file_hash
+    print " = " * 20
+    sleep(1)
+    #test_notarize(text = file_hash)
+    print " = " * 20
+    txid = "e99484b82e472212464ecee6b756d3267071809f77a17807f502775db421254e"
+    print "transaction id of proof: %s" % txid
+    print " = " * 20
+    sleep(1)
+
+    #txid = raw_input("Enter the txid when it confirmed: ")
+    tx_hash_bc = test_hash_validation(txid=txid).get("hash")
+    print " = " * 20
+    print "keystamp in blockchain on given transaction id: %s" % tx_hash_bc
+    print " = " * 20
+    sleep(1)
+
+    if tx_hash_bc == file_hash:
+        print " = " * 20
+        print "%s = %s" % (tx_hash_bc,file_hash)
+        print "Cryptographically Validated of existence of keystamp.pdf on the time of transaction(Nov 27th, 11:00 AM EST!"
+        print " = " * 20
+    #test_file_url_txid_validation(file_url = file_url, txid = txid)
 
 
 #mist TEsts
@@ -210,6 +240,6 @@ def test_complete_verification_round(file_url = "https://avatars3.githubusercont
 
 #test_notarize(text = test_hash)
 # test_hash_validation(txid="e3fe5b2020772193026af9e790a134bc3404e8c74454be46aa7f6d11035f642c")
-test_complete_verification_round()
-
+#test_complete_verification_round()
+test_complete_verification_round_demo()
 #TODO: make an endpont that gets a file url and a txid and checks if both hashes are the same!
